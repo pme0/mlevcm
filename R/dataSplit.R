@@ -5,17 +5,20 @@
 #' @param y A numeric or factor response vector of size \code{N}, where \code{N} is
 #' the number of observations (spectra).
 #'
-#' @param train_size
+#' @param train_size Proportion of observations to be assigned to the training subset.
 #'
-#' @param valid_size
+#' @param valid_size Proportion of observations to be assigned to the validating subset.
 #'
-#' @param test_size
+#' @param test_size Proportion of observations to be assigned to the testing subset.
 #'
-#' @param reps
+#' @param reps Number of randomisations of the training/validating/testing subsets to
+#' produce.
 #'
-#' @param balanced
+#' @param balanced Whether the dataset should be balanced (TRUE) or not (FALSE).
+#' See \code{\link{fdaML_train}} for more details.
 #'
-#' @param force_nonempty_response_class
+#' @param fnrc Force Nonempty Response Class. Ensures that each replication has
+#' samples from each possible level of the response.
 #'
 #' @return A list with the indices (running from \code{1} to \code{length(y)}) of
 #' training, validation and testing observations. Each of these 3 lists is a list
@@ -24,7 +27,7 @@
 #'
 #' @export
 #'
-dataSplit <- function(y, train_size, valid_size, test_size, reps, balanced, force_nonempty_response_class=TRUE){
+dataSplit <- function(y, train_size, valid_size, test_size, reps, balanced, fnrc=TRUE){
 
   id_train <- id_valid <- id_test <- list()
   uniq <- sort(unique(y))
@@ -61,7 +64,7 @@ dataSplit <- function(y, train_size, valid_size, test_size, reps, balanced, forc
       ntr <- ntr + 1
     }
     for(r in 1:reps){
-      if(force_nonempty_response_class){
+      if(fnrc){
         # make sure that each replication has samples from each possible response
         status <- T
         while(status){

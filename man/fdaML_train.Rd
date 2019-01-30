@@ -42,8 +42,8 @@ If \code{TRUE}, observations are discarded so that the number of observations fo
 level of the response variable is approximately the same. It applies to both Classification
 and Regression with integer-valued response.}
 
-\item{reps}{Number of randomisations of the training/validation/testing sets to average over
-in cross-validation.}
+\item{reps}{Number of randomisations of the training/validating/testing subsets to average
+over in cross-validation.}
 
 \item{Q_vec}{Vector of numbers of PCA/PLS components to be tried in cross-validation.
 The dedault is a vector of evenly spaced values (approximately, due to rounding) between
@@ -62,8 +62,8 @@ If \code{tau_Q_opt>0}, then \code{Q} is the smallest value which gives a RMSD/AU
 a margin \code{tau_Q_opt} of the optimal RMSD/AUC.}
 
 \item{lam_cv_type}{Cross-validation strategy to be used when choosing the penalty
-parameter \code{lambda}: ordinary cross-validation (\code{ocv}), generalised
-cross-validation (\code{gcv}) or no cross-validation/penalisation (\code{n}).}
+parameter \code{lambda}: ordinary cross-validation (\code{"ocv"}), generalised
+cross-validation (\code{"gcv"}) or no cross-validation/penalisation (\code{"n"}).}
 
 \item{lam_vec}{Vector of penalty parameters to be tried in cross-validation. The
 default is a set of 10 values between 0.001 and 20 on an exponential scale.}

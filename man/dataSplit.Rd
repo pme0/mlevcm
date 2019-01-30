@@ -5,23 +5,26 @@
 \title{Data split}
 \usage{
 dataSplit(y, train_size, valid_size, test_size, reps, balanced,
-  force_nonempty_response_class = TRUE)
+  fnrc = TRUE)
 }
 \arguments{
 \item{y}{A numeric or factor response vector of size \code{N}, where \code{N} is
 the number of observations (spectra).}
 
-\item{train_size}{The}
+\item{train_size}{Proportion of observations to be assigned to the training subset.}
 
-\item{valid_size}{}
+\item{valid_size}{Proportion of observations to be assigned to the validating subset.}
 
-\item{test_size}{}
+\item{test_size}{Proportion of observations to be assigned to the testing subset.}
 
-\item{reps}{}
+\item{reps}{Number of randomisations of the training/validating/testing subsets to
+produce.}
 
-\item{balanced}{}
+\item{balanced}{Whether the dataset should be balanced (TRUE) or not (FALSE).
+See \code{\link{fdaML_train}} for more details.}
 
-\item{force_nonempty_response_class}{}
+\item{fnrc}{Force Nonempty Response Class. Ensures that each replication has
+samples from each possible level of the response.}
 }
 \value{
 A list with the indices (running from \code{1} to \code{length(y)}) of
