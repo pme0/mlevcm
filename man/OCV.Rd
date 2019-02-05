@@ -4,7 +4,7 @@
 \alias{OCV}
 \title{Ordinary Cross-Validation for penalty parameter}
 \usage{
-OCV(XX, yy, newX, newY, optionEst)
+OCV(XX, yy, newX, newY, optionsEst)
 }
 \arguments{
 \item{XX}{Training predictor matrix.}
@@ -15,8 +15,24 @@ OCV(XX, yy, newX, newY, optionEst)
 
 \item{newY}{Validation response matrix.}
 
-\item{optionEst}{List of options for estimation.}
+\item{optionsEst}{List of options for estimation.}
+}
+\value{
+The value of lambda which minimises the Ordinary Cross-Validation criterion,
+that is, minimises the RMSD (for Regression) or maximises the AUC (for Classification).
 }
 \description{
 Ordinary Cross-Validation method for optimising the penalty parameter.
+}
+\details{
+
+}
+\examples{
+
+}
+\references{
+
+}
+\seealso{
+
 }

@@ -2,13 +2,18 @@
 % Please edit documentation in R/fdaPrediction.R
 \name{fdaPrediction}
 \alias{fdaPrediction}
-\title{???}
+\title{Predict responses}
 \usage{
-fdaPrediction(m, newX, optionPred)
+fdaPrediction(m, newX, optionsPred)
 }
 \arguments{
-\item{???}{}
+\item{m}{An object of class \code{fdaModel} computed with \code{\link{fdaML_train}}.}
+
+\item{newX}{A numeric predictor matrix of new observations for which predictions
+are sought.}
+
+\item{optionsPred}{A list with parameters for prediction.}
 }
 \description{
-???.
+Produce predictions for new observations.
 }

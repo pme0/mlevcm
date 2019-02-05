@@ -7,28 +7,35 @@
 #'
 #' @param y_vec Response vector.
 #'
-#' @param XBD_mat Functional predictor matrix after dimension reduction.
-#'
-#' @param S Number of non-functional predictors.
-#'
-#' @param intercept Whether to include a model intercept (\code{TRUE}) or not (\code{FALSE}).
+#' @param XBD_mat Functional predictor matrix after dimension reduction, plus an intercept
+#' if appropriate.
 #'
 #' @param penmat Penalty matrix.
 #'
 #' @param lam Penalty parameter.
 #'
+#' @param l1 First column of functional predictor, equal to \code{1} if
+#' \code{intercept=FALSE} and \code{2} if \code{intercept=TRUE}.
+#'
+#' @param lv Last column of functional predictor, equal to\code{col(XBD_mat)}.
+#'
+#' @details
+#'
+#' @return The penalised GLM objective function evaluated at \code{pars}.
+#'
+#' @references
+#'
+#' @seealso
+#'
+#' @examples
+#'
 #' @export
 #'
-LossFunction_GLM <- function(pars, y_vec, XBD_mat, S, intercept, penmat, lam){
-  if(S != 0){ stop("Currently non-functional predictors are only tested on the optimal cross-validated model.") }
-  if(intercept){
-    XBD_mat <- cbind(1, XBD_mat) }
-  l0 <- ifelse(intercept == T, 2, 1)
-  lv <- ncol(XBD_mat)
+LossFunction_GLM <- function(pars, y_vec, XBD_mat, penmat, lam, l1, lv){
   if(lam == 0){
     return( sum(log(1 + exp((-1)^y_vec * XBD_mat %*% pars))) )
   }else{
-    return( sum(log(1 + exp((-1)^y_vec * XBD_mat %*% pars))) + length(y_vec) * lam * (t(pars[l0:lv]) %*% penmat %*% pars[l0:lv]) )
+    return( sum(log(1 + exp((-1)^y_vec * XBD_mat %*% pars))) + length(y_vec) * lam * (t(pars[l1:lv]) %*% penmat %*% pars[l1:lv]) )
   }
 }
 
@@ -43,28 +50,35 @@ LossFunction_GLM <- function(pars, y_vec, XBD_mat, S, intercept, penmat, lam){
 #'
 #' @param y_vec Response vector.
 #'
-#' @param XBD_mat Functional predictor matrix after dimension reduction.
-#'
-#' @param S Number of non-functional predictors.
-#'
-#' @param intercept Whether to include a model intercept (\code{TRUE}) or not (\code{FALSE}).
+#' @param XBD_mat Functional predictor matrix after dimension reduction, plus an intercept
+#' if appropriate.
 #'
 #' @param penmat Penalty matrix.
 #'
 #' @param lam Penalty parameter.
 #'
+#' @param l1 First column of functional predictor (\code{1} if \code{intercept=FALSE},
+#' \code{2} if \code{intercept=TRUE}.
+#'
+#' @param lv Last column of functional predictor (\code{col(XBD_mat)}).
+#'
+#' @details
+#'
+#' @return The penalised LM objective function evaluated at \code{pars}.
+#'
+#' @references
+#'
+#' @seealso
+#'
+#' @examples
+#'
 #' @export
 #'
-LossFunction_LM <- function(pars, y_vec, XBD_mat, S, intercept, penmat, lam){
-  if(S != 0){ stop("Currently non-functional predictors are only tested on the optimal cross-validated model.") }
-  if(intercept){
-    XBD_mat <- cbind(1, XBD_mat) }
-  l0 <- ifelse(intercept == T, 2, 1)
-  lv <- ncol(XBD_mat)
+LossFunction_LM <- function(pars, y_vec, XBD_mat, penmat, lam, l1, lv){
   if(lam == 0){
     return( t(y_vec - XBD_mat %*% pars) %*% (y_vec - XBD_mat %*% pars) )
   }else{
-    return( t(y_vec - XBD_mat %*% pars) %*% (y_vec - XBD_mat %*% pars) + length(y_vec) * lam * (t(pars[l0:lv]) %*% penmat %*% pars[l0:lv]) )
+    return( t(y_vec - XBD_mat %*% pars) %*% (y_vec - XBD_mat %*% pars) + length(y_vec) * lam * (t(pars[l1:lv]) %*% penmat %*% pars[l1:lv]) )
   }
 }
 
@@ -79,6 +93,16 @@ LossFunction_LM <- function(pars, y_vec, XBD_mat, S, intercept, penmat, lam){
 #' @param y_true True response.
 #'
 #' @param fam Model family.
+#'
+#' @details
+#'
+#' @return Area Under the ROC Curve (AUC).
+#'
+#' @references
+#'
+#' @seealso
+#'
+#' @examples
 #'
 #' @export
 #'
@@ -102,6 +126,16 @@ GET_auc <- function(y_pred, y_true, fam){
 #'
 #' @param y_pred Predicted response.
 #'
+#' @details
+#'
+#' @return Root Mean Squared Deviation.
+#'
+#' @references
+#'
+#' @seealso
+#'
+#' @examples
+#'
 #' @export
 #'
 GET_rmsd <- function(y_true, y_pred){
@@ -110,9 +144,10 @@ GET_rmsd <- function(y_true, y_pred){
 
 
 
-#' @title Optimal cross-validation parameters' index
+#' @title Optimal \code{Q} index
 #'
-#' @description Compute index of best performing cross-validation parameters.
+#' @description Compute index of best performing number of PCA/PLS components \code{Q}
+#' from the cross-validation results.
 #'
 #' @param perf Performance matrix.
 #'
@@ -123,6 +158,16 @@ GET_rmsd <- function(y_true, y_pred){
 #' or maximises AUC (for Classification).
 #' If \code{threshold>0}, then \code{Q} is the smallest value which gives a RMSD/AUC within
 #' a margin \code{threshold} of the optimal RMSD/AUC.
+#'
+#' @details
+#'
+#' @return The index of the best performing cross-validation parameters.
+#'
+#' @references
+#'
+#' @seealso
+#'
+#' @examples
 #'
 #' @export
 #'
@@ -156,8 +201,8 @@ GET_IdxQ_opt <- function(perf, model, threshold){
 
 #' @title Compute penalty parameter
 #'
-#' @description Compute penalty parameter by either Ordinary Cross-Validation
-#' or GeneralisedCross-Validation.
+#' @description Compute penalty parameter \code{lambda} by either ordinary
+#' cross-validation (OCV) or generalised cross-validation (GCV).
 #'
 #' @param XBD_trainQ Training predictor matrix.
 #'
@@ -167,30 +212,30 @@ GET_IdxQ_opt <- function(perf, model, threshold){
 #'
 #' @param y_valid Validation response matrix.
 #'
-#' @param optionEst List of options for estimation.
+#' @param optionsEst List of options for estimation.
+#'
+#' @details
+#'
+#' @return The value of the penalty parameter \code{lambda}.
+#'
+#' @references
+#'
+#' @seealso
+#'
+#' @examples
 #'
 #' @export
 #'
-GET_lambda <- function(XBD_trainQ, XBD_validQ, y_train, y_valid, optionEst){
-  if(optionEst$lam_cv_type == "n"){
+GET_lambda <- function(XBD_trainQ, XBD_validQ, y_train, y_valid, optionsEst){
+  if(optionsEst$lam_cv_type == "n"){
     lam <- 0
-  }else if(optionEst$lam_cv_type=="ocv"){
-    if(optionEst$model == "lm"){
-      lam <- OCV(XX=XBD_trainQ, yy=y_train, newX=XBD_validQ, newY=y_valid, optionEst=optionEst)
-    }else if(optionEst$model == "glm"){
-      lam <- OCV(XX=XBD_trainQ, yy=y_train, newX=XBD_validQ, newY=y_valid, optionEst=optionEst)
-      # ALTERNATIVELY USE cv.glmnet():
-      #cv <- cv.glmnet(x = XBD_trainQ, y = y_train, intercept = F, lambda = lam_vec, family = fam, weights = wgts, alpha = elnet)
-      #lam <- cv$lambda.min
-    }
-  }else if(optionEst$lam_cv_type=="gcv"){
+  }else if(optionsEst$lam_cv_type=="ocv"){
+    lam <- OCV(XX=XBD_trainQ, yy=y_train, newX=XBD_validQ, newY=y_valid, optionsEst=optionsEst)
+    # ALTERNATIVELY USE cv.glmnet():
+    #cv <- cv.glmnet(x = XBD_trainQ, y = y_train, intercept = F, lambda = lam_vec, family = fam, weights = wgts, alpha = elnet)
+    #lam <- cv$lambda.min
+  }else if(optionsEst$lam_cv_type=="gcv"){
     stop("Generalised cross validation not fully implemented. Choose lam_cv_type='ocv' instead.")
-    if(optionEst$model == "lm"){
-      #lam <- GCV.S(y=fdata(XBD_validQ), S=S.LLR(1:ncol(XBD_trainQ),h=5))
-      #lam <- GCV(XX = XBD_trainQ, yy = y_train, penmat = penmat)
-    }else if(optionEst$model == "glm"){
-      #
-    }
   }
   if(is.nan(lam)){ lam <- 0 }
   return(lam)
@@ -210,22 +255,33 @@ GET_lambda <- function(XBD_trainQ, XBD_validQ, y_train, y_valid, optionEst){
 #'
 #' @param newY Validation response matrix.
 #'
-#' @param optionEst List of options for estimation.
+#' @param optionsEst List of options for estimation.
+#'
+#' @details
+#'
+#' @return The value of lambda which minimises the Ordinary Cross-Validation criterion,
+#' that is, minimises the RMSD (for Regression) or maximises the AUC (for Classification).
+#'
+#' @references
+#'
+#' @seealso
+#'
+#' @examples
 #'
 #' @export
 #'
-OCV <- function(XX, yy, newX, newY, optionEst){
-  q <- length(optionEst$lam_vec)
+OCV <- function(XX, yy, newX, newY, optionsEst){
+  q <- length(optionsEst$lam_vec)
   res <- rep(0,q)
-  optionEst_ocv <- optionEst
+  optionsEst_ocv <- optionsEst
   for(l in 1:q){
-    optionEst_ocv$lam <- optionEst_ocv$lam_vec[l]
-    m <- fdaEstimation(XX = XX, yy = yy, optionEst = optionEst_ocv)
-    newYpred <- fdaPrediction(m = m, newX = newX, optionPred = list(lam_cv_type = optionEst$lam_cv_type, intercept = optionEst$intercept))
-    if(optionEst$model == "lm"){
+    optionsEst_ocv$lam <- optionsEst_ocv$lam_vec[l]
+    m <- fdaEstimation(XX = XX, yy = yy, optionsEst = optionsEst_ocv)
+    newYpred <- fdaPrediction(m = m, newX = newX, optionsPred = list(lam_cv_type = optionsEst$lam_cv_type, intercept = optionsEst$intercept))
+    if(optionsEst$model == "lm"){
       res[l] <- GET_rmsd(newY, newYpred)
-    }else if(optionEst$model == "glm"){
-      res[l] <- GET_auc(y_pred = newYpred, y_true = newY, fam = optionEst$fam)
+    }else if(optionsEst$model == "glm"){
+      res[l] <- GET_auc(y_pred = newYpred, y_true = newY, fam = optionsEst$fam)
     }
   }
   # THIS DOES TWO ROUNDS: THE 1ST WITH A LARGE AND SPARSE GRID OF LAMBDAS, THE 2ND WITH A FOCUSED GRID AROUND THE BEST LAMBDA FROM THE 1ST ROUND:
@@ -233,16 +289,16 @@ OCV <- function(XX, yy, newX, newY, optionEst){
   #   if(h!=1){ lam_vec <- seq(lam_vec[max(which.min(res)-3,1)], lam_vec[min(which.min(res)+3,q)], len=q) }
   #   res <- rep(0,q)
   #   for(l in 1:length(lam_vec)){
-  #     m <- fdaEstimation(XX = XX, yy = yy, optionEst = list(model=model, penmat=penmat, lam=lam_vec[l], wgts=wgts))
-  #     newYpred <- fdaPrediction(m = m, newX = newX, optionPred = list())
+  #     m <- fdaEstimation(XX = XX, yy = yy, optionsEst = list(model=model, penmat=penmat, lam=lam_vec[l], wgts=wgts))
+  #     newYpred <- fdaPrediction(m = m, newX = newX, optionsPred = list())
   #     res[l] <- GET_rmsd(newY, newYpred)
   #   }
   #   if( which.min(res) == q ){ warning("interval for penalty parameter lambda in OCV() should be widened.") }
   # }
-  if(optionEst$model == "lm"){
-    return( optionEst_ocv$lam_vec[which.min(res)] )
-  }else if(optionEst$model == "glm"){
-    return( optionEst_ocv$lam_vec[which.max(res)] )
+  if(optionsEst$model == "lm"){
+    return( optionsEst_ocv$lam_vec[which.min(res)] )
+  }else if(optionsEst$model == "glm"){
+    return( optionsEst_ocv$lam_vec[which.max(res)] )
   }
 }
 
@@ -257,6 +313,16 @@ OCV <- function(XX, yy, newX, newY, optionEst){
 #' @param yy Training response vector.
 #'
 #' @param penmat Penalty matrix.
+#'
+#' @details
+#'
+#' @return The value of lambda which minimises the Generalised Cross-Validation criterion.
+#'
+#' @references
+#'
+#' @seealso
+#'
+#' @examples
 #'
 #' @export
 #'
@@ -280,9 +346,10 @@ GCV <- function(XX, yy, penmat){
 
 #' @title Compute weights
 #'
-#' @description Compute weights for each observation.
+#' @description Compute the weights of each observation for parameter estimation.
 #'
 #' @param weighted Whether to use observation weights (\code{TRUE}) or not (\code{FALSE}).
+#' If \code{weighted=FALSE}, uniform weights are used.
 #'
 #' @param weights Externally provided weights.
 #'
@@ -396,9 +463,6 @@ confusion_plot <- function(d, fam, avgError, binom_labels=c(y0="observed class: 
   if(fam == "binomial"){
 
     plot(NA, xlim=c(-0.5,1.5), ylim=c(0,1)-c(-0.036,0.036), cex=cex, cex.lab=cex, bty="n", axes=F, mar=rep(0,4), mgp=c(0,0,0), xlab="", ylab="") #xlab="true class", ylab="predicted class"
-    #axis(side=1, at=c(0,1), labels=c(0,1), tick=F, cex=cex, cex.axis=cex, cex.lab=cex, line=-1)
-    #axis(side=2, at=c(d$tnr/2,d$tnr+d$fpr/2), labels=c(0,1), tick=F, cex=cex, cex.axis=cex, line=-1)
-    #axis(side=4, mgp=c(0,0.4,0), cex=cex, cex.axis=cex)
     axis(side=1, at=0.5, labels=binom_labels["yhat1"], tick=F, cex=cex, cex.axis=cex, cex.lab=cex, line=-1)
     axis(side=2, at=0.5, labels=binom_labels["y0"], tick=F, cex=cex, cex.axis=cex, cex.lab=cex, line=-1)
     axis(side=3, at=0.5, labels=binom_labels["yhat0"], tick=F, cex=cex, cex.axis=cex, cex.lab=cex, line=-1)
@@ -459,13 +523,15 @@ confusion_plot <- function(d, fam, avgError, binom_labels=c(y0="observed class: 
 #' @param letter A named list containing a string \code{char} to be plotted as
 #' a subplot label at \code{(xloc,yloc)}.
 #'
+#' @details
+#'
 #' @export
 #'
 crossvalidation_levelplot <- function(note_x, note_y, letter=list(char="", xloc=1, yloc=1), ...){
   panel.levelplot(...)
-  # PLOT THE SMOOTHEST MODEL
+  # SMOOTHEST MODEL
   panel.points(note_x[1], note_y[1], pch=20, col="black", cex=1)
-  # PLOT THE CONTOUR FOR THE 'ACCEPTABLE MODELS'
+  # CONTOUR FOR THE 'ACCEPTABLE MODELS'
   for(h in 1:length(note_x)){
     # bottom boundaries
     if( length(which(note_y[-h] < note_y[h])) > 0 ){

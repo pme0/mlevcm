@@ -19,8 +19,8 @@ are assessed.}
 \item{verbose}{Whether to print a progress bar (\code{TRUE}) or not (\code{FALSE}).}
 }
 \value{
-An object of class \code{"fdaModelPred"}, which is a list
-containing the results of the model.
+An object of class \code{fdaModelPred}, which is a list containing the
+predictions given by model in \code{obj}.
 }
 \description{
 Predict using machine learning model.

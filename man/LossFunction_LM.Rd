@@ -4,7 +4,7 @@
 \alias{LossFunction_LM}
 \title{Penalised LM objective function}
 \usage{
-LossFunction_LM(pars, y_vec, XBD_mat, S, intercept, penmat, lam)
+LossFunction_LM(pars, y_vec, XBD_mat, penmat, lam, l1, lv)
 }
 \arguments{
 \item{pars}{Parameter vector (\code{alpha}, \code{omega}), with \code{alpha} scalar
@@ -12,16 +12,33 @@ and \code{omega} a \code{Q}-dimensional vector.}
 
 \item{y_vec}{Response vector.}
 
-\item{XBD_mat}{Functional predictor matrix after dimension reduction.}
-
-\item{S}{Number of non-functional predictors.}
-
-\item{intercept}{Whether to include a model intercept (\code{TRUE}) or not (\code{FALSE}).}
+\item{XBD_mat}{Functional predictor matrix after dimension reduction, plus an intercept
+if appropriate.}
 
 \item{penmat}{Penalty matrix.}
 
 \item{lam}{Penalty parameter.}
+
+\item{l1}{First column of functional predictor (\code{1} if \code{intercept=FALSE},
+\code{2} if \code{intercept=TRUE}.}
+
+\item{lv}{Last column of functional predictor (\code{col(XBD_mat)}).}
+}
+\value{
+The penalised LM objective function evaluated at \code{pars}.
 }
 \description{
 Objective function for the penalised LM, to be optimised using stats::nlm()..
+}
+\details{
+
+}
+\examples{
+
+}
+\references{
+
+}
+\seealso{
+
 }

@@ -2,13 +2,31 @@
 % Please edit documentation in R/fdaSmooth.R
 \name{fdaSmooth}
 \alias{fdaSmooth}
-\title{???}
+\title{Smooth spectra}
 \usage{
-fdaSmooth(X_rough, wgts = 1, wvls = 350:2500)
+fdaSmooth(X_rough, wgts = NULL, wvls = 350:2500)
 }
 \arguments{
-\item{???}{}
+\item{X_rough}{A numeric matrix of size \code{N*P}, where \code{N} is
+the number of observations (spectra) and \code{P} is the number of points
+(wavelengths) at which spectra are measured.}
+
+\item{wgts}{A numeric vector of weights for smoothing spectra.}
+
+\item{wvls}{A numeric vector giving the wavelenghts at which spectra were measured.}
+}
+\value{
+A matrix the same size of \code{X_rough} containing the smoothed spectra.
 }
 \description{
-???.
+Compute a smoothed version of the spectra using splines.
+}
+\examples{
+
+}
+\references{
+
+}
+\seealso{
+
 }

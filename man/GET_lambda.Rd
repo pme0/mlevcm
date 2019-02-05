@@ -4,7 +4,7 @@
 \alias{GET_lambda}
 \title{Compute penalty parameter}
 \usage{
-GET_lambda(XBD_trainQ, XBD_validQ, y_train, y_valid, optionEst)
+GET_lambda(XBD_trainQ, XBD_validQ, y_train, y_valid, optionsEst)
 }
 \arguments{
 \item{XBD_trainQ}{Training predictor matrix.}
@@ -15,9 +15,24 @@ GET_lambda(XBD_trainQ, XBD_validQ, y_train, y_valid, optionEst)
 
 \item{y_valid}{Validation response matrix.}
 
-\item{optionEst}{List of options for estimation.}
+\item{optionsEst}{List of options for estimation.}
+}
+\value{
+The value of the penalty parameter \code{lambda}.
 }
 \description{
-Compute penalty parameter by either Ordinary Cross-Validation
-or GeneralisedCross-Validation.
+Compute penalty parameter \code{lambda} by either ordinary
+cross-validation (OCV) or generalised cross-validation (GCV).
+}
+\details{
+
+}
+\examples{
+
+}
+\references{
+
+}
+\seealso{
+
 }

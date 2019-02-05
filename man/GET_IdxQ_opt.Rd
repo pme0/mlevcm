@@ -2,7 +2,7 @@
 % Please edit documentation in R/fdaAuxFunctions.R
 \name{GET_IdxQ_opt}
 \alias{GET_IdxQ_opt}
-\title{Optimal cross-validation parameters' index}
+\title{Optimal \code{Q} index}
 \usage{
 GET_IdxQ_opt(perf, model, threshold)
 }
@@ -17,6 +17,22 @@ or maximises AUC (for Classification).
 If \code{threshold>0}, then \code{Q} is the smallest value which gives a RMSD/AUC within
 a margin \code{threshold} of the optimal RMSD/AUC.}
 }
+\value{
+The index of the best performing cross-validation parameters.
+}
 \description{
-Compute index of best performing cross-validation parameters.
+Compute index of best performing number of PCA/PLS components \code{Q}
+from the cross-validation results.
+}
+\details{
+
+}
+\examples{
+
+}
+\references{
+
+}
+\seealso{
+
 }

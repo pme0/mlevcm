@@ -7,7 +7,8 @@
 GET_weights(weighted, weights = NULL, yy, id, uniq)
 }
 \arguments{
-\item{weighted}{Whether to use observation weights (\code{TRUE}) or not (\code{FALSE}).}
+\item{weighted}{Whether to use observation weights (\code{TRUE}) or not (\code{FALSE}).
+If \code{weighted=FALSE}, uniform weights are used.}
 
 \item{weights}{Externally provided weights.}
 
@@ -18,7 +19,7 @@ GET_weights(weighted, weights = NULL, yy, id, uniq)
 \item{uniq}{Unique levels in the response vector.}
 }
 \description{
-Compute weights for each observation.
+Compute the weights of each observation for parameter estimation.
 }
 \details{
 Compute weights invesely proportional to the number of observations

@@ -2,13 +2,17 @@
 % Please edit documentation in R/fdaEstimation.R
 \name{fdaEstimation}
 \alias{fdaEstimation}
-\title{???}
+\title{Estimate parameters}
 \usage{
-fdaEstimation(XX, yy, optionEst = NULL)
+fdaEstimation(XX, yy, optionsEst = NULL)
 }
 \arguments{
-\item{???}{}
+\item{XX}{A numeric predictor matrix.}
+
+\item{yy}{A numeric response vector.}
+
+\item{optionsEst}{A list with parameters for estimation.}
 }
 \description{
-???.
+Produce parameter estimates for the statistical model.
 }

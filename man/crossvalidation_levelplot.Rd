@@ -20,3 +20,6 @@ Plots the cross-validation results for the number of components
 \code{Q} and penalty parameter \code{lambda}, with the optimal and ensemble
 models marked
 }
+\details{
+
+}

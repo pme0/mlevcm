@@ -5,11 +5,11 @@
 \title{Train a Machine Learning model}
 \usage{
 fdaML_train(X, y, Z = NULL, task, model = NULL, reduction,
-  intercept = TRUE, smooth = T, balanced = F, reps = 100,
+  intercept = TRUE, smooth_w = NULL, balanced = FALSE, reps = 100,
   Q_vec = NULL, Q_len = NULL, Q_opt = NULL, tau_Q_opt = 0,
   lam_cv_type = "n", lam_vec = NULL, split_size = c(0.5, 0.25, 0.25),
-  weighted = FALSE, weights = NULL, Bspline_dim = ncol(X),
-  t_range = 350:2500, verbose = TRUE, ll = NULL)
+  estimation_w = NULL, bspline_dim = ncol(X), t_range = 350:2500,
+  verbose = TRUE, ll = NULL)
 }
 \arguments{
 \item{X}{A numeric functional predictor matrix of size \code{N*P}, where \code{N} is
@@ -34,8 +34,8 @@ after bining/one-hot-encoding has taken place.}
 
 \item{intercept}{Whether to include a model intercept (\code{TRUE}) or not (\code{FALSE}).}
 
-\item{smooth}{Whether to use the original spectra (\code{FALSE}) or smoothed spectra
-(\code{TRUE}).}
+\item{smooth_w}{A numeric vector of length equal to \code{length(t_tange)} with weights for
+smoothing spectra.}
 
 \item{balanced}{Whether the dataset should be balanced (\code{TRUE}) or not (\code{FALSE}).
 If \code{TRUE}, observations are discarded so that the number of observations for each
@@ -63,7 +63,7 @@ a margin \code{tau_Q_opt} of the optimal RMSD/AUC.}
 
 \item{lam_cv_type}{Cross-validation strategy to be used when choosing the penalty
 parameter \code{lambda}: ordinary cross-validation (\code{"ocv"}), generalised
-cross-validation (\code{"gcv"}) or no cross-validation/penalisation (\code{"n"}).}
+cross-validation (\code{"gcv"}) or no penalisation (\code{"n"}).}
 
 \item{lam_vec}{Vector of penalty parameters to be tried in cross-validation. The
 default is a set of 10 values between 0.001 and 20 on an exponential scale.}
@@ -74,13 +74,12 @@ specifying the proportion of observations to be assigned to the training subset,
 case the validation and testing subsets are assigned a proportion \code{(1-split_size)/2}
 of observations each.}
 
-\item{weighted}{...}
+\item{estimation_w}{A numeric vector of length equal to \code{length(y)} with weights for
+coeficient function estimation.}
 
-\item{weights}{...}
+\item{bspline_dim}{The dimension of the cubic B-spline functional representation system.}
 
-\item{Bspline_dim}{The dimension of the cubic B-spline functional representation system.}
-
-\item{t_range}{...}
+\item{t_range}{A numeric vector giving the wavelenghts at which spectra were measured.}
 
 \item{verbose}{Whether to print a progress bar (\code{TRUE}) or not (\code{FALSE}).}
 
@@ -88,7 +87,7 @@ of observations each.}
 the function parameters as usual, or this list, but not both.}
 }
 \value{
-An object of class \code{fdaModel}, which is a list containing the results of the model.
+An object of class \code{fdaModel}, which is a list containing the trained model.
 }
 \description{
 Train a machine learning model.

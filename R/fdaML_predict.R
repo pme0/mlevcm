@@ -15,8 +15,8 @@
 #'
 #' @details
 #'
-#' @return An object of class \code{"fdaModelPred"}, which is a list
-#' containing the results of the model.
+#' @return An object of class \code{fdaModelPred}, which is a list containing the
+#' predictions given by model in \code{obj}.
 #'
 #' @seealso
 #' \code{\link{fdaML_train}}
@@ -88,7 +88,7 @@ fdaML_predict <- function(obj, new_x, new_z = NULL, new_y, verbose = TRUE){
 
     if(obj$task == "regr"){
 
-      new_y_pred[,rr]  <- fdaPrediction(m = obj$m_opt[[rr]], newX = new_XBV[[rr]],  optionPred = list(intercept = obj$intercept, lam_cv_type=obj$lam_cv_type, task=obj$task, model=obj$model, fam=obj$family))
+      new_y_pred[,rr]  <- fdaPrediction(m = obj$m_opt[[rr]], newX = new_XBV[[rr]],  optionsPred = list(intercept = obj$intercept, lam_cv_type=obj$lam_cv_type, task=obj$task, model=obj$model, fam=obj$family))
       resid_test[,rr] <- new_y - new_y_pred[,rr]
       err_test[rr] <- GET_rmsd(new_y, new_y_pred[,rr])
       for(uu in 1:length(uniq)){# bias
@@ -101,7 +101,7 @@ fdaML_predict <- function(obj, new_x, new_z = NULL, new_y, verbose = TRUE){
 
       if(obj$family == "binomial"){
 
-        new_y_pred[,rr]  <- fdaPrediction(m = obj$m_opt[[rr]], newX = new_XBV[[rr]],  optionPred = list(intercept=obj$intercept, lam_cv_type=obj$lam_cv_type, task=obj$task, model=obj$model, fam=obj$family))
+        new_y_pred[,rr]  <- fdaPrediction(m = obj$m_opt[[rr]], newX = new_XBV[[rr]],  optionsPred = list(intercept=obj$intercept, lam_cv_type=obj$lam_cv_type, task=obj$task, model=obj$model, fam=obj$family))
         AUC_opt[rr,] <- c(NA, NA, GET_auc(y_pred = new_y_pred[,rr],  y_true = new_y,  f = obj$family))
         ROC_to_plot_binom$pred_test[[rr]] <- new_y_pred[,rr]
         ROC_to_plot_binom$labels[[rr]]    <- new_y
@@ -109,9 +109,9 @@ fdaML_predict <- function(obj, new_x, new_z = NULL, new_y, verbose = TRUE){
       }else if(obj$family == "multinomial"){
 
         # get class probabilities by repetition (see also 'classProbs_byTrueLabel' below)
-        classProbs[[rr]] <- drop(fdaPrediction(m = obj$m_opt[[rr]], newX = new_XBV[[rr]], optionPred = list(lam_cv_type=obj$lam_cv_type, intercept=obj$intercept, fam=obj$family, predType="probs")))
+        classProbs[[rr]] <- drop(fdaPrediction(m = obj$m_opt[[rr]], newX = new_XBV[[rr]], optionsPred = list(lam_cv_type=obj$lam_cv_type, intercept=obj$intercept, fam=obj$family, predType="probs")))
         # get class predictions
-        classPreds[[rr]] <- drop(fdaPrediction(m = obj$m_opt[[rr]], newX = new_XBV[[rr]], optionPred = list(lam_cv_type=obj$lam_cv_type, intercept=obj$intercept, fam=obj$family, predType="class")))
+        classPreds[[rr]] <- drop(fdaPrediction(m = obj$m_opt[[rr]], newX = new_XBV[[rr]], optionsPred = list(lam_cv_type=obj$lam_cv_type, intercept=obj$intercept, fam=obj$family, predType="class")))
         new_y_pred[,rr] <- as.numeric(classPreds[[rr]]) - 1
         if(all(new_y_pred[,rr] != 0)){ stop("# MAKE SURE LABELS START AT 0!") }
         # get accuracy rate

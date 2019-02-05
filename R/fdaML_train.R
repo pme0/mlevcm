@@ -22,8 +22,8 @@
 #' @param reduction Partial Least Squares (\code{"pls"}), Principal Component Analysis
 #' (\code{"pca"}), or no further dimension reduction (\code{"n"}).
 #'
-#' @param smooth Whether to use the original spectra (\code{FALSE}) or smoothed spectra
-#' (\code{TRUE}).
+#' @param smooth_w A numeric vector of length equal to \code{length(t_tange)} with weights for
+#' smoothing spectra.
 #'
 #' @param balanced Whether the dataset should be balanced (\code{TRUE}) or not (\code{FALSE}).
 #' If \code{TRUE}, observations are discarded so that the number of observations for each
@@ -64,13 +64,12 @@
 #'
 #' @param intercept Whether to include a model intercept (\code{TRUE}) or not (\code{FALSE}).
 #'
-#' @param weighted ...
+#' @param estimation_w A numeric vector of length equal to \code{length(y)} with weights for
+#' coeficient function estimation.
 #'
-#' @param weights ...
+#' @param bspline_dim The dimension of the cubic B-spline functional representation system.
 #'
-#' @param Bspline_dim The dimension of the cubic B-spline functional representation system.
-#'
-#' @param t_range ...
+#' @param t_range A numeric vector giving the wavelenghts at which spectra were measured.
 #'
 #' @param verbose Whether to print a progress bar (\code{TRUE}) or not (\code{FALSE}).
 #'
@@ -79,7 +78,7 @@
 #'
 #' @details
 #'
-#' @return An object of class \code{fdaModel}, which is a list containing the results of the model.
+#' @return An object of class \code{fdaModel}, which is a list containing the trained model.
 #'
 #' @references
 #' P.M. Esperança, Thomas S. Churcher (2019). "Machine learning based
@@ -98,7 +97,7 @@
 #'
 #' @export
 #'
-fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRUE, smooth=T, balanced=F, reps=100, Q_vec=NULL, Q_len=NULL, Q_opt=NULL, tau_Q_opt=0.0, lam_cv_type="n", lam_vec=NULL, split_size=c(0.5,0.25,0.25), weighted=FALSE, weights=NULL, Bspline_dim=ncol(X), t_range=350:2500, verbose=TRUE, ll=NULL){
+fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRUE, smooth_w=NULL, balanced=FALSE, reps=100, Q_vec=NULL, Q_len=NULL, Q_opt=NULL, tau_Q_opt=0.0, lam_cv_type="n", lam_vec=NULL, split_size=c(0.5,0.25,0.25), estimation_w=NULL, bspline_dim=ncol(X), t_range=350:2500, verbose=TRUE, ll=NULL){
 
 
   # BASIC ENTRY CHECKS
@@ -114,7 +113,7 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
       task <- ll$task
       model <- ll$model
       reduction <- ll$reduction
-      smooth <- ll$smooth
+      smooth_w <- ll$smooth_w
       intercept <- ll$intercept
       balanced <- ll$balanced
       lam_cv_type <- ll$lam_cv_type
@@ -125,9 +124,8 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
       Q_opt <- ll$Q_opt
       split_size <- ll$split_size
       tau_Q_opt <- ll$tau_Q_opt
-      weighted <- ll$weighted
-      weights <- ll$weights
-      Bspline_dim <- ll$Bspline_dim
+      estimation_w <- ll$estimation_w
+      bspline_dim <- ll$bspline_dim
       t_range <- ll$t_range
       verbose <- ll$verbose
     }
@@ -176,8 +174,16 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
   if( !is.logical(intercept) )
     stop("Input 'intercept' must be logical (TRUE or FALSE).")
 
-  if( !is.logical(smooth) )
-    stop("Input 'smooth' must be logical (TRUE or FALSE).")
+  if( !missing(smooth_w) & !is.null(smooth_w) ){
+    if( !(is.vector(smooth_w) & is.numeric(smooth_w)) )
+      stop("Input 'smooth_w' must be a numeric vector.")
+    if( any(smooth_w < 0) | any(smooth_w %% 1 != 0) )
+      stop("All elements of input 'smooth_w' must be non-negative integer/whole number.")
+    if( length(smooth_w) != length(t_range) )
+      stop("Input parameter 'smooth_w' must be a vector of length equal to length(t_range).")
+    smooth_spectra = TRUE
+  }else{
+    smooth_spectra= FALSE }
 
   if( !is.logical(balanced) )
     stop("Input 'balanced' must be logical (TRUE or FALSE).")
@@ -217,22 +223,25 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
     }else{
         stop("Input 'split_size' must be a vector of length 1 or 3.") }}
 
-  if( !is.logical(weighted) )
-    stop("Input 'weighted' must be logical (TRUE or FALSE).")
+  if( !missing(estimation_w) & !is.null(estimation_w) ){
+    stop("Weighted Estimation not implemented yet.") # delete this line once weighted estimation is implemented
+    if( !(is.vector(estimation_w) & is.numeric(estimation_w)) )
+      stop("Input 'estimation_w' must be a numeric vector.")
+    if( any(estimation_w < 0) | any(estimation_w %% 1 != 0) )
+      stop("All elements of input 'estimation_w' must be non-negative integer/whole number.")
+    if( length(estimation_w) != length(y) )
+      stop("Input parameter 'estimation_w' must be a vector of length equal to length(y).")
+    weighted_estimation <- TRUE
+  }else{
+    weighted_estimation <- FALSE }
 
-  if( !missing(weights) & !is.null(weights) ){
-    if( !(is.vector(weights) & is.numeric(weights)) )
-      stop("Input 'weights' must be a numeric vector")
-    if( any(weights < 0) | any(weights %% 1 != 0) )
-      stop("All elements of input 'weights' must be non-negative integer/whole number.") }
-
-  if( !missing(Bspline_dim) ){
-    if( !(is.vector(Bspline_dim) & is.numeric(Bspline_dim) & length(Bspline_dim)==1) )
-      stop("Input 'Bspline_dim' must be a numeric scalar")
-    if( Bspline_dim < 1 | Bspline_dim > ncol(X) )
-      stop("Input 'Bspline_dim' must be greater than 1 and smaller than ncol(X).")
-    if( Bspline_dim %% 1 != 0 )
-      stop("Input 'Bspline_dim' must be an integer/whole number.") }
+  if( !missing(bspline_dim) ){
+    if( !(is.vector(bspline_dim) & is.numeric(bspline_dim) & length(bspline_dim)==1) )
+      stop("Input 'bspline_dim' must be a numeric scalar")
+    if( bspline_dim < 1 | bspline_dim > ncol(X) )
+      stop("Input 'bspline_dim' must be greater than 1 and smaller than ncol(X).")
+    if( bspline_dim %% 1 != 0 )
+      stop("Input 'bspline_dim' must be an integer/whole number.") }
 
   if( task == "clas" & lam_cv_type == "gcv" ){
     glmcv <- TRUE
@@ -309,9 +318,9 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
 
 
   # USE SMOOTHED SPECTRA
-  if(smooth){
+  if(smooth_spectra){
     X_original <- X
-    X <- fdaSmooth(X)
+    X <- fdaSmooth(X, wgts=smooth_w, wvls=350:2500)
   }else{
     X_original <- "same as X" }
 
@@ -320,7 +329,7 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
   if(reduction == "n"){
     breaks <- seq(t_range[1], t_range[length(t_range)], len = P - 2)
   }else if(reduction == "pca" | reduction == "pls"){
-    breaks <- seq(t_range[1], t_range[length(t_range)], len = Bspline_dim-2) }
+    breaks <- seq(t_range[1], t_range[length(t_range)], len = bspline_dim-2) }
   B    <- bsplineS(t_range, breaks, norder=4, returnMatrix=F)
   B_d2 <- bsplineS(t_range, breaks, norder=4, returnMatrix=F, nderiv=2) # 2nd derivative
   PtP <- t(B_d2) %*% B_d2
@@ -370,7 +379,7 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
 
     # initialisations
     ROC[[rr]] <- list()
-    wgts <- GET_weights(weighted, weights, yy = y, id=id_train[[rr]], uniq = lvls)
+    wgts <- GET_weights(weighted_estimation, estimation_w, yy = y, id=id_train[[rr]], uniq = lvls)
 
 
     # data transformations
@@ -422,30 +431,26 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
     }
 
 
-    if(reduction == "none"){
-      # WE CAN SKIP THIS STEP AND GO STRAIGHT TO TESTING UNLESS WE NEED CV ON LAMBDA
-      #mQ <- taskEstimation(task = task, XX = XBD_train, yy = y_train, optionEst = list(fam=family, wgts=wgts, test=F, elnet=elnet))
+    if(reduction == "n"){
+      stop("Estimation without spectra reduction (pca/pls) is possible but not implemented yet.")
     }else{
       for(qq in 1:Q_len){
         Qcomp <- ifelse(is.null(Q_opt), Q_vec[qq], Q_opt)
         D_Q <- D[,1:Qcomp,drop=F]
-        #wgts <- if(!is.null(weighted)){ if(isTRUE(weighted)){ FIND_WEIGHTS(as_vector(y_train),bias) }else{ NULL }}
         XBD_trainQ <- XBD_train[,1:Qcomp]
         XBD_validQ <- XB_valid %*% D_Q
-        #!!!!!
         if(!is.null(Z)){
           XBD_trainQ <- cbind(Z_train, XBD_trainQ)
           XBD_validQ <- cbind(Z_valid, XBD_validQ)
         }
-        #!!!!!
         penmat <- drop(t(D_Q) %*% PtP %*% D_Q)
-        optionEst = list(intercept=intercept, S=S, task=task, model=model, fam=family, lam_cv_type=lam_cv_type, wgts=wgts, penmat=penmat, lam_vec=lam_vec, glmcv=glmcv, test=F, elnet=elnet)
-        if((model == "glm") & (lam_cv_type != "n")){ optionEst$penmat <- penmat }   #optionEst$D <- D_Q; optionEst$PtP <- PtP}
-        lam_cv[rr,qq] <- GET_lambda(XBD_trainQ, XBD_validQ, y_train, y_valid, optionEst)
-        optionEst$lam <- lam_cv[rr,qq]
-        mQ <- fdaEstimation(XX = XBD_trainQ, yy = y_train, optionEst = optionEst)
-        optionPred <- list(intercept=intercept, task=task, model=model, fam=family, lam_cv_type=lam_cv_type, lam=lam_cv[rr,qq], predType="class")
-        y_validpred <- fdaPrediction(m = mQ, newX = XBD_validQ, optionPred = optionPred)
+        optionsEst = list(intercept=intercept, S=S, task=task, model=model, fam=family, lam_cv_type=lam_cv_type, wgts=wgts, penmat=penmat, lam_vec=lam_vec, glmcv=glmcv, test=F, elnet=elnet)
+        if((model == "glm") & (lam_cv_type != "n")){ optionsEst$penmat <- penmat }   #optionsEst$D <- D_Q; optionsEst$PtP <- PtP}
+        lam_cv[rr,qq] <- GET_lambda(XBD_trainQ, XBD_validQ, y_train, y_valid, optionsEst)
+        optionsEst$lam <- lam_cv[rr,qq]
+        mQ <- fdaEstimation(XX = XBD_trainQ, yy = y_train, optionsEst = optionsEst)
+        optionsPred <- list(intercept=intercept, task=task, model=model, fam=family, lam_cv_type=lam_cv_type, lam=lam_cv[rr,qq], predType="class")
+        y_validpred <- fdaPrediction(m = mQ, newX = XBD_validQ, optionsPred = optionsPred)
         if(task == "clas"){
           if(family == "binomial"){
             perf_cv[rr,qq] <- GET_auc(y_pred = y_validpred, y_true = y_valid, f = family)
@@ -453,9 +458,9 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
             perf_cv[rr,qq] <- GET_auc(y_pred = y_validpred, y_true = y_valid, f = family)
             for(lvls_id in 1:nlvls){
               y_lvl <- as.numeric(y_train == lvls[lvls_id])
-              m_lvl <- fdaEstimation(XX=XBD_trainQ, yy=y_lvl, optionEst = list(model=model, fam="binomial", wgts=wgts, penmat = penmat, lam = lam_cv[rr,qq], lam_cv_type=lam_cv_type, glmcv=glmcv, test=T, elnet=elnet))
-              optionPred_multinom <- optionPred;  optionPred_multinom$fam <- "binomial"
-              y_pred_lvl <- fdaPrediction(m = m_lvl, newX = XBD_validQ, optionPred = optionPred_multinom)
+              m_lvl <- fdaEstimation(XX=XBD_trainQ, yy=y_lvl, optionsEst = list(model=model, fam="binomial", wgts=wgts, penmat = penmat, lam = lam_cv[rr,qq], lam_cv_type=lam_cv_type, glmcv=glmcv, test=T, elnet=elnet))
+              optionsPred_multinom <- optionsPred;  optionsPred_multinom$fam <- "binomial"
+              y_pred_lvl <- fdaPrediction(m = m_lvl, newX = XBD_validQ, optionsPred = optionsPred_multinom)
               pred_lvl <- prediction(y_pred_lvl, as.numeric(y_valid == lvls[lvls_id]))
               perf_lvl <- performance(pred_lvl, "auc")
               perf_cv_ALT[rr,qq,paste0("l",lvls[lvls_id])] <- unlist(slot(performance(pred_lvl, "auc"), "y.values"))
@@ -545,14 +550,14 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
       XBD_test_opt[[rr]]  <- cbind(Z[id_test[[rr]],, drop=F], XBD_test_opt[[rr]])
     }
     penmat_opt[[rr]] <- t(D_opt[[rr]]) %*% PtP %*% D_opt[[rr]]
-    mOpt[[rr]] <- fdaEstimation(XX=XBD_train_opt[[rr]], yy=y_train_opt, optionEst = list(intercept=intercept, S=S, lam_cv_type=lam_cv_type, task=task, model=model, fam=family, wgts=wgts, penmat = penmat_opt[[rr]], lam = lam_opt, glmcv=glmcv, test=T, elnet=elnet))  #coeffs_opt <- solve( StS + lam_cv[rr,which(Q_opt==Q_vec)] * t(D_opt) %*% PtP %*% D_opt ) %*% t(XBD_train_opt[[rr]]) %*% y_train_opt
+    mOpt[[rr]] <- fdaEstimation(XX=XBD_train_opt[[rr]], yy=y_train_opt, optionsEst = list(intercept=intercept, S=S, lam_cv_type=lam_cv_type, task=task, model=model, fam=family, wgts=wgts, penmat = penmat_opt[[rr]], lam = lam_opt, glmcv=glmcv, test=T, elnet=elnet))  #coeffs_opt <- solve( StS + lam_cv[rr,which(Q_opt==Q_vec)] * t(D_opt) %*% PtP %*% D_opt ) %*% t(XBD_train_opt[[rr]]) %*% y_train_opt
     if(!is.null(Z)){# p-values for exogenous variables; glmnet() doesn't give std errors by default, thus using glm() here
       Z_pvalue[rr,] <- summary(glm(as.numeric(y_train_opt) ~ 1 + XBD_train_opt[[rr]]))$coefficients[coef_pos["gamma","from"]:coef_pos["gamma","to"], "Pr(>|t|)"]
     }
-    optionPred = list(intercept=intercept, lam_cv_type=lam_cv_type, task=task, model=model, fam=family, lam = lam_opt)
-    y_trainpred_opt[,rr] <- fdaPrediction(m = mOpt[[rr]], newX = XBD_train_opt[[rr]], optionPred = optionPred)   #XBD_train_opt[[rr]] %*% coeffs_opt
-    y_validpred_opt[,rr] <- fdaPrediction(m = mOpt[[rr]], newX = XBD_valid_opt[[rr]], optionPred = optionPred)   #scale(XB[id_valid[[rr]],], cen=cenX[[rr]],scale=F)  %*% D_opt %*% coeffs_opt
-    y_testpred_opt[,rr]  <- fdaPrediction(m = mOpt[[rr]], newX = XBD_test_opt[[rr]],  optionPred = optionPred)   #scale(XB[id_test[[rr]],],  cen=cenX[[rr]],scale=F)  %*% D_opt %*% coeffs_opt
+    optionsPred = list(intercept=intercept, lam_cv_type=lam_cv_type, task=task, model=model, fam=family, lam = lam_opt)
+    y_trainpred_opt[,rr] <- fdaPrediction(m = mOpt[[rr]], newX = XBD_train_opt[[rr]], optionsPred = optionsPred)   #XBD_train_opt[[rr]] %*% coeffs_opt
+    y_validpred_opt[,rr] <- fdaPrediction(m = mOpt[[rr]], newX = XBD_valid_opt[[rr]], optionsPred = optionsPred)   #scale(XB[id_valid[[rr]],], cen=cenX[[rr]],scale=F)  %*% D_opt %*% coeffs_opt
+    y_testpred_opt[,rr]  <- fdaPrediction(m = mOpt[[rr]], newX = XBD_test_opt[[rr]],  optionsPred = optionsPred)   #scale(XB[id_test[[rr]],],  cen=cenX[[rr]],scale=F)  %*% D_opt %*% coeffs_opt
     if(task == "regr"){
       # regression coefficients in the space of original predictors
       if(!is.na(coef_pos["alpha",1]))
@@ -613,7 +618,7 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
         ROC_to_plot_binom$labels[[rr]]    <- y[id_test[[rr]]]
       }else if(family == "multinomial"){
         # get class probabilities
-        classProbs[[rr]] <- drop(fdaPrediction(m = mOpt[[rr]], newX = scale(XB[id_test[[rr]],],  cen=cenX[[rr]],scale=F)  %*% D_opt[[rr]], optionPred = list(fam=family, lam_cv_type=lam_cv_type, predType="probs")))
+        classProbs[[rr]] <- drop(fdaPrediction(m = mOpt[[rr]], newX = scale(XB[id_test[[rr]],],  cen=cenX[[rr]],scale=F)  %*% D_opt[[rr]], optionsPred = list(fam=family, lam_cv_type=lam_cv_type, predType="probs")))
         # regression coefficients in the space of original predictors
         ;
         # auc/roc
@@ -622,8 +627,8 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
                           GET_auc(y_pred = y_testpred_opt[,rr],  y_true = y[id_test[[rr]]],  f = family))
         for(lvls_id in 1:nlvls){# see https://stats.stackexchange.com/questions/2151/how-to-plot-roc-curves-in-multiclass-classification and especially https://stats.stackexchange.com/questions/71700/how-to-draw-roc-curve-with-three-response-variable/110550#110550
           y_opt_lvl <- as.numeric(y_train_opt == lvls[lvls_id])
-          mOpt_lvl <- fdaEstimation(XX=XBD_train_opt[[rr]], yy=y_opt_lvl, optionEst = list(intercept=intercept, lam_cv_type=lam_cv_type, model=model, fam="binomial", wgts=wgts, penmat = penmat_opt[[rr]], lam = lam_opt, glmcv=glmcv, test=T, elnet=elnet))  #coeffs_opt <- solve( StS + lam_cv[rr,which(Q_opt==Q_vec)] * t(D_opt) %*% PtP %*% D_opt ) %*% t(XBD_train_opt[[rr]]) %*% y_train_opt
-          y_testpred_opt_lvl <- fdaPrediction(m = mOpt_lvl, newX = scale(XB[id_test[[rr]],], cen=cenX[[rr]],scale=F) %*% D_opt[[rr]], optionPred = list(fam="binomial", lam_cv_type=lam_cv_type))   #scale(XB[id_test[[rr]],],  cen=cenX[[rr]],scale=F)  %*% D_opt %*% coeffs_opt
+          mOpt_lvl <- fdaEstimation(XX=XBD_train_opt[[rr]], yy=y_opt_lvl, optionsEst = list(intercept=intercept, lam_cv_type=lam_cv_type, model=model, fam="binomial", wgts=wgts, penmat = penmat_opt[[rr]], lam = lam_opt, glmcv=glmcv, test=T, elnet=elnet))  #coeffs_opt <- solve( StS + lam_cv[rr,which(Q_opt==Q_vec)] * t(D_opt) %*% PtP %*% D_opt ) %*% t(XBD_train_opt[[rr]]) %*% y_train_opt
+          y_testpred_opt_lvl <- fdaPrediction(m = mOpt_lvl, newX = scale(XB[id_test[[rr]],], cen=cenX[[rr]],scale=F) %*% D_opt[[rr]], optionsPred = list(fam="binomial", lam_cv_type=lam_cv_type))   #scale(XB[id_test[[rr]],],  cen=cenX[[rr]],scale=F)  %*% D_opt %*% coeffs_opt
           ROC_to_plot_multinom[[as.character(lvls[lvls_id])]]$pred_test[[rr]] <- y_testpred_opt_lvl
           ROC_to_plot_multinom[[as.character(lvls[lvls_id])]]$labels[[rr]]    <- as.numeric(y[id_test[[rr]]] == lvls[lvls_id])
         }
@@ -690,7 +695,10 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
                          cenX = cenX,
                          cenY = cenY,
                          reps = reps,
-                         weights = weights,
+                         smooth_spectra = smooth_spectra,
+                         smooth_w = smooth_w,
+                         weighted_estimation = weighted_estimation,
+                         estimation_w = estimation_w,
                          y_trainpred_opt = y_trainpred_opt,
                          y_validpred_opt = y_validpred_opt,
                          y_testpred_opt  = y_testpred_opt,
@@ -707,7 +715,7 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
                          family = family,
                          intercept = intercept,
                          t_range = t_range,
-                         t_range_mod = seq(t_range[1], t_range[length(t_range)], len = Bspline_dim) # t_range_mod may be different from t_range, depending on the number of breaks used to create the B-spline                         messed_up_lambdas = messed_up_lambdas
+                         t_range_mod = seq(t_range[1], t_range[length(t_range)], len = bspline_dim) # t_range_mod may be different from t_range, depending on the number of breaks used to create the B-spline                         messed_up_lambdas = messed_up_lambdas
                          ), class="fdaModel")
 
   return(ret)

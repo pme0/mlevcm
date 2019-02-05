@@ -13,6 +13,21 @@ GCV(XX, yy, penmat)
 
 \item{penmat}{Penalty matrix.}
 }
+\value{
+The value of lambda which minimises the Generalised Cross-Validation criterion.
+}
 \description{
 Generalised Cross-Validation method for optimising the penalty parameter.
+}
+\details{
+
+}
+\examples{
+
+}
+\references{
+
+}
+\seealso{
+
 }
