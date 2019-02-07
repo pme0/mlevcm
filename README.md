@@ -2,7 +2,7 @@
 
 **mlevcm** is an R package for **ML**-based **E**pidemiological **V**ector **C**ontrol **M**onitoring using FDA techniques for NIRS data.
 
-The package includes functions to train, predict and assess the performance of machine learning models for spectral data using techniques from Functional Data Analysis---namely functional representation of spectra, spectra smoothing and penalised parameter estimation.
+The package includes functions to train, predict and assess the performance of machine learning models for spectral data using techniques from Functional Data Analysis---namely functional representation of spectra, spectra smoothing and penalised estimation of the coefficient function.
 
 
 ## Main Functions
