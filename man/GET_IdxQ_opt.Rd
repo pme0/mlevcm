@@ -18,7 +18,7 @@ If \code{threshold>0}, then \code{Q} is the smallest value which gives a RMSD/AU
 a margin \code{threshold} of the optimal RMSD/AUC.}
 }
 \value{
-The index of the best performing cross-validation parameters.
+The index of the best performing parameter \code{Q}.
 }
 \description{
 Compute index of best performing number of PCA/PLS components \code{Q}

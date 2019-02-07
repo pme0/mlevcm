@@ -14,7 +14,7 @@ fdaML_predict(obj, new_x, new_z = NULL, new_y, verbose = TRUE)
 \item{new_z}{A new non-functional predictor matrix.}
 
 \item{new_y}{A new response vector. If this is provided, the quality of predictions
-are assessed.}
+is assessed.}
 
 \item{verbose}{Whether to print a progress bar (\code{TRUE}) or not (\code{FALSE}).}
 }

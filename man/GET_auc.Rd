@@ -14,10 +14,10 @@ GET_auc(y_pred, y_true, fam)
 \item{fam}{Model family.}
 }
 \value{
-Area Under the ROC Curve (AUC).
+
 }
 \description{
-Compute the Area Under the ROC Curve.
+Compute the Area Under the ROC Curve (AUC).
 }
 \details{
 

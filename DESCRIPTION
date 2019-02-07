@@ -2,7 +2,7 @@ Package: mlevcm
 Title: ML-based Epidemiological Vector Control Monitoring using FDA techniques for NIRS data
 Version: 0.1.0
 Authors@R: person("Pedro M.", "Esperança", email = "esperanca@imperial.ac.uk", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Description: The mlevcm package provides functions to train and test machine learning models capable of predicting characteristics of epidemiological interest of disease vectors (e.g., mosquitoes) such as age, species and infectiousness from near-infrared spectra.
 Depends:
 	caret,
 	dummies,

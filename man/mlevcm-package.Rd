@@ -10,13 +10,8 @@ FDA techniques for NIRS data}
 The \code{mlevcm} package provides functions to train and test machine
 learning models capable of predicting characteristics of epidemiological
 interest of disease vectors (e.g., mosquitoes) such as age, species and
-infectiousness.
+infectiousness from near-infrared spectra.
 }
-\section{mlevcm functions}{
-
-The foo functions ...
-}
-
 \references{
 P.M. Esperança, Thomas S. Churcher (2019). "Machine learning based
 epidemiological vector control monitoring using functional data analysis

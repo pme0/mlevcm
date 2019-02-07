@@ -12,7 +12,7 @@ GET_rmsd(y_true, y_pred)
 \item{y_pred}{Predicted response.}
 }
 \value{
-Root Mean Squared Deviation.
+
 }
 \description{
 Compute the Root Mean Squared Deviation.

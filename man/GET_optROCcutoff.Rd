@@ -15,5 +15,5 @@ GET_optROCcutoff(pred, perf, costs = NULL)
 associated with false positives and false negatives, respectively.}
 }
 \description{
-Compute the optimal cutoff for Classification
+Compute the optimal probability cutoff for classification.
 }

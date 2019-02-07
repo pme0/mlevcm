@@ -86,7 +86,7 @@ LossFunction_LM <- function(pars, y_vec, XBD_mat, penmat, lam, l1, lv){
 
 #' @title Compute AUC
 #'
-#' @description Compute the Area Under the ROC Curve.
+#' @description Compute the Area Under the ROC Curve (AUC).
 #'
 #' @param y_pred Predicted response.
 #'
@@ -96,7 +96,7 @@ LossFunction_LM <- function(pars, y_vec, XBD_mat, penmat, lam, l1, lv){
 #'
 #' @details
 #'
-#' @return Area Under the ROC Curve (AUC).
+#' @return
 #'
 #' @references
 #'
@@ -128,7 +128,7 @@ GET_auc <- function(y_pred, y_true, fam){
 #'
 #' @details
 #'
-#' @return Root Mean Squared Deviation.
+#' @return
 #'
 #' @references
 #'
@@ -161,7 +161,7 @@ GET_rmsd <- function(y_true, y_pred){
 #'
 #' @details
 #'
-#' @return The index of the best performing cross-validation parameters.
+#' @return The index of the best performing parameter \code{Q}.
 #'
 #' @references
 #'
@@ -387,7 +387,7 @@ GET_weights <- function(weighted, weights=NULL, yy, id, uniq){
 
 #' @title Compute optimal cutoff for classification
 #'
-#' @description Compute the optimal cutoff for Classification
+#' @description Compute the optimal probability cutoff for classification.
 #'
 #' @param pred An object of class \code{prediction} generated with \code{\link[ROCR]{prediction}}.
 #'

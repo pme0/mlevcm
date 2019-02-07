@@ -18,7 +18,7 @@ or class \code{fdaModelPred} from \code{\link{fdaML_predict}}.}
 \item{multinom_labels}{Labels for the multinomial classes.}
 }
 \description{
-displays visual diagnostics information and performance measures
+Displays visual diagnostics information and performance measures
 for objects of class \code{fdaModel} and \code{fdaModelPred}.
 }
 \seealso{

@@ -1,6 +1,6 @@
 #' @title Diagnostics and performance plots
 #'
-#' @description displays visual diagnostics information and performance measures
+#' @description Displays visual diagnostics information and performance measures
 #' for objects of class \code{fdaModel} and \code{fdaModelPred}.
 #'
 #' @param obj An object of class \code{fdaModel} from \code{\link{fdaML_train}}

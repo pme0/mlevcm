@@ -1,8 +1,9 @@
-#' @title  ???
+#' @title Prediction results plot
 #'
-#' @description  ???.
+#' @description Displays visual diagnostics information and performance measures
+#' for objects of class \code{fdaModelPred}.
 #'
-#' @param  ???
+#' @param obj_pred An object of class \code{fdaModelPred} from \code{\link{fdaML_predict}}.
 #'
 #' @export
 #'

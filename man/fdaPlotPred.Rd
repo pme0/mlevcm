@@ -2,13 +2,14 @@
 % Please edit documentation in R/fdaPlotPred.R
 \name{fdaPlotPred}
 \alias{fdaPlotPred}
-\title{???}
+\title{Prediction results plot}
 \usage{
 fdaPlotPred(obj_pred)
 }
 \arguments{
-\item{???}{}
+\item{obj_pred}{An object of class \code{fdaModelPred} from \code{\link{fdaML_predict}}.}
 }
 \description{
-???.
+Displays visual diagnostics information and performance measures
+for objects of class \code{fdaModelPred}.
 }
