@@ -23,7 +23,8 @@
 #' (\code{"pca"}), or no further dimension reduction (\code{"n"}).
 #'
 #' @param smooth_w A numeric vector of length equal to \code{length(t_tange)} with weights for
-#' smoothing spectra.
+#' smoothing spectra. If spectra smoothign is desired, this vector has to be specified. For
+#' unweighted smoothing, choose all elements the same (e.g., \code{rep(1,length(t_range))}).
 #'
 #' @param balanced Whether the dataset should be balanced (\code{TRUE}) or not (\code{FALSE}).
 #' If \code{TRUE}, observations are discarded so that the number of observations for each
@@ -417,7 +418,7 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
       D <- svdX$v                   #[loadings] = $rotation in prcomp()  #==#OR#==#  eigX <- eigen(t(XB_train) %*% XB_train); D <- eigX$vectors
       XBD_train <-  XB_train %*% D    #[scores] = XB_train %*% D = $x in prcomp()
     }else if(reduction == "pls"){
-      plsX <- plsr(c(y_train) ~ -1 + XB_train, ncomp=N_train-1, method="simpls", validation="none")
+      plsX <- plsr(c(y_train) ~ -1 + XB_train, ncomp=min(ncol(XB_train), N_train)-1, method="simpls", validation="none")
       D <- plsX$projection      # [loadings][help(simpls_fit): "the projection matrix used to convert X to scores"]
       XBD_train <- plsX$scores  # = XB_train %*% D  [scores]
       # m1 <- plsr(c(y_train) ~ -1 + XB_train, ncomp=N_train-1, validation="LOO", method="simpls")
@@ -537,7 +538,7 @@ fdaML_train <- function(X, y, Z=NULL, task, model=NULL, reduction, intercept=TRU
       XBD_train_opt[[rr]] <- XB_train_opt %*% D_opt[[rr]]
       PCA_variationExplained[,rr] <- svdX_opt$d[1:Q_opt] / sum(svdX_opt$d[1:Q_opt])
     }else if(reduction == "pls"){
-      plsX <- plsr(c(y_train_opt) ~ -1 + XB_train_opt, ncomp=N_train-1, method="simpls", validation="none")
+      plsX <- plsr(c(y_train_opt) ~ -1 + XB_train_opt, ncomp=min(ncol(XB_train), N_train)-1, method="simpls", validation="none")
       D_opt[[rr]] <- plsX$projection[,1:Q_opt]
       XBD_train_opt[[rr]] <- plsX$scores[,1:Q_opt]
     }

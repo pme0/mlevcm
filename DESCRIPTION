@@ -6,6 +6,7 @@ Description: The mlevcm package provides functions to train and test machine lea
 Depends:
 	caret,
 	dummies,
+	e1071,
 	fda,
 	glmnet,
 	gplots,

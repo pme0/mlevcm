@@ -4,10 +4,10 @@
 \alias{fdaPlotPred}
 \title{Prediction results plot}
 \usage{
-fdaPlotPred(obj_pred)
+fdaPlotPred(obj)
 }
 \arguments{
-\item{obj_pred}{An object of class \code{fdaModelPred} from \code{\link{fdaML_predict}}.}
+\item{obj}{An object of class \code{fdaModelPred} from \code{\link{fdaML_predict}}.}
 }
 \description{
 Displays visual diagnostics information and performance measures

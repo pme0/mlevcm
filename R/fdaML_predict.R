@@ -53,6 +53,7 @@ fdaML_predict <- function(obj, new_x, new_z = NULL, new_y, verbose = TRUE){
   avgTestErr_avgTrainCut <- confu <- dc <- NA
   classProbs <- classPreds <- list()
   avgErr <- rep(NA, obj$reps)
+  err_stdev_out <- NULL
 
   # coefficients' positions
   coef_pos <- matrix(NA,3,2); rownames(coef_pos) <- c('alpha', 'gamma', 'beta'); colnames(coef_pos) <- c('from', 'to')

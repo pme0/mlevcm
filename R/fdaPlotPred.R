@@ -3,24 +3,24 @@
 #' @description Displays visual diagnostics information and performance measures
 #' for objects of class \code{fdaModelPred}.
 #'
-#' @param obj_pred An object of class \code{fdaModelPred} from \code{\link{fdaML_predict}}.
+#' @param obj An object of class \code{fdaModelPred} from \code{\link{fdaML_predict}}.
 #'
 #' @export
 #'
-fdaPlotPred <- function(obj_pred){
+fdaPlotPred <- function(obj){
 
 
-  if(class(obj_pred) != 'fdaModelPred'){
+  if(class(obj) != 'fdaModelPred'){
     stop('object class invalid!')
   }
 
-  uniq <- sort(unique(obj_pred$new_y) + obj_pred$cenY)
+  uniq <- sort(unique(obj$new_y) + obj$cenY)
   lu <- length(uniq)
 
-  if(obj_pred$model == "lm"){
+  if(obj$model == "lm"){
 
     #  plot(new_y+cenY, rowMeans(new_y_pred)+cenY); abline(0,1)
-    plot(jitter(rep(obj_pred$new_y, obj_pred$reps) + obj_pred$cenY), c(obj_pred$new_y_pred) + obj_pred$cenY, col=alpha("black",0.2), xlab='true age', ylab='predicted age'); abline(0,1)
+    plot(jitter(rep(obj$new_y, obj$reps) + obj$cenY), c(obj$new_y_pred) + obj$cenY, col=alpha("black",0.2), xlab='true age', ylab='predicted age'); abline(0,1)
     legend("bottomright", c(paste0("Kopt=", obj$Kopt), paste0("Kmax=", obj$Kmax)), lty=1:2, bty="n", cex=0.9)
 
 
@@ -30,7 +30,7 @@ fdaPlotPred <- function(obj_pred){
     # gather all data (across 'obj$reps') in one vector for each of the unique values of 'y'
     alldata <- list()
     for(u in 1:lu){
-      alldata[[u]] <- obj_pred$new_y_pred[(obj_pred$new_y+obj_pred$cenY) == uniq[u]] + obj_pred$cenY
+      alldata[[u]] <- obj$new_y_pred[(obj$new_y+obj$cenY) == uniq[u]] + obj$cenY
     }
     # compute percentiles for each of the unique values of 'y'
     ofs <- (min(uniq)==0);    ofs_x <- 0.4
@@ -43,7 +43,7 @@ fdaPlotPred <- function(obj_pred){
     }
     # boxplot
     xlabels <- rep(NA,max(uniq)-min(uniq)+2); xlabels[0:(1+max(uniq)+ofs) %in% uniq] <- uniq
-    range_pred <- range(percentiles) #range(c(sapply(1:obj_pred$reps, function(r){ obj_pred$new_y_pred[,r]+obj_pred$cenY })) )
+    range_pred <- range(percentiles) #range(c(sapply(1:obj$reps, function(r){ obj$new_y_pred[,r]+obj$cenY })) )
     ofs <- (min(uniq)==0);    ofs_x <- 0.4
     plot(0, col=NA, xlim=c(0,1+max(uniq)), ylim=c(-1,1)+range_pred, xaxt='n', xlab="true age", ylab="predicted age")
     axis(side=1, at=0:(1+max(uniq)+ofs), labels=xlabels)
@@ -67,36 +67,36 @@ fdaPlotPred <- function(obj_pred){
     #abline(0,1)
     # legend
     legend("topleft", legend=c("mean", "truth"), col=c("green","Gold"), pch=c(NA,19), lty=c(1,NA), lwd=c(1,NA), seg.len=0.75, bty="n", cex=0.8)
-    legend("topright", paste0("avg pred error: ",round(mean(obj_pred$err_test),2)), bty="n", cex=0.8, text.col="brown")
-    biasVec <- colMeans(obj_pred$bias_test)
+    legend("topright", paste0("avg pred error: ",round(mean(obj$err_test),2)), bty="n", cex=0.8, text.col="brown")
+    biasVec <- colMeans(obj$bias_test)
     text(x = uniq, y = range_pred[1]-1, labels = paste0(round(biasVec,2)), cex=0.8, col="purple")
     text(uniq[lu], range_pred[1]+0.3, "bias:", cex=0.8, col="purple")
 
-    return(list(err = round(mean(obj_pred$err_test),2),
+    return(list(err = round(mean(obj$err_test),2),
                 largest_bias = round(biasVec[which.max(abs(biasVec))]),2)
     )
 
-  }else if(obj_pred$model == "glm"){
+  }else if(obj$model == "glm"){
 
     ### PLOT 3 --- error/accuracy and optimal cutoff point (putting equal weight on sensitivity and specificity)
     #
-    if(obj_pred$family == "binomial"){
+    if(obj$family == "binomial"){
 
-      pred <- prediction(obj_pred$ROC_to_plot_binom$pred_test, obj_pred$ROC_to_plot_binom$labels)
+      pred <- prediction(obj$ROC_to_plot_binom$pred_test, obj$ROC_to_plot_binom$labels)
       perf <- performance(pred, "tpr", "fpr")
       measureType <- "err"
       if(measureType == "err"){ #error
         # stats
         err_perf <- performance(pred, measure = "err")
-        err_ind = sapply(1:obj_pred$reps, function(z){ which.min(err_perf@y.values[[z]]) })
+        err_ind = sapply(1:obj$reps, function(z){ which.min(err_perf@y.values[[z]]) })
         if(any(err_ind == 1)){   # get rid of infinities in 'err_perf@x.values)'
-          tt <- (1:obj_pred$reps)[err_ind == 1]; for(l in 1:length(tt)){ if( is.infinite(slot(err_perf, "x.values")[[tt[l]]][1]) ){ err_ind[tt[l]] <- 2 }}
+          tt <- (1:obj$reps)[err_ind == 1]; for(l in 1:length(tt)){ if( is.infinite(slot(err_perf, "x.values")[[tt[l]]][1]) ){ err_ind[tt[l]] <- 2 }}
         }
-        err_val = sapply(1:obj_pred$reps, function(z){ err_perf@y.values[[z]][err_ind[z]] })
-        err_cut = sapply(1:obj_pred$reps, function(z){ err_perf@x.values[[z]][err_ind[z]] })
+        err_val = sapply(1:obj$reps, function(z){ err_perf@y.values[[z]][err_ind[z]] })
+        err_cut = sapply(1:obj$reps, function(z){ err_perf@x.values[[z]][err_ind[z]] })
         avg_err <- mean(err_val)
         avg_err_cut <- mean(err_cut)
-        avg_err_avgcut <- mean((obj_pred$new_y_pred[,1] > avg_err_cut) != rep(obj_pred$new_y + obj_pred$cenY, 1))
+        avg_err_avgcut <- mean((obj$new_y_pred[,1] > avg_err_cut) != rep(obj$new_y + obj$cenY, 1))
         # plot
         # err_colcode <- ifelse( all(avg_err_avgcut < c(0.5, mean(obj$y==1), mean(obj$y==0))), "green", ifelse(all(avg_err_avgcut < 0.5), "orange", "red") )
         # d_allcurves <- data.frame(x = unlist(err_perf@x.values), y = unlist(err_perf@y.values)); d_allcurves <- d_allcurves[order(d_allcurves$x),]
@@ -112,11 +112,11 @@ fdaPlotPred <- function(obj_pred){
 
     ### PLOT 4 --- ROC for best cross-validation parameter for all replications, plus average in bold
     #
-    avg_auc <- mean(obj_pred$AUC_opt[,"test"])
+    avg_auc <- mean(obj$AUC_opt[,"test"])
 
-    if(obj_pred$family == "binomial"){
+    if(obj$family == "binomial"){
 
-      pred <- prediction(obj_pred$ROC_to_plot_binom$pred_test, obj_pred$ROC_to_plot_binom$labels)
+      pred <- prediction(obj$ROC_to_plot_binom$pred_test, obj$ROC_to_plot_binom$labels)
       perf <- performance(pred, "tpr", "fpr")
       dd <- data.frame(x = unlist(perf@x.values), y = unlist(perf@y.values)); dd <- dd[order(dd[,1]),]
       xvals <- seq(0, 1, by=0.1);   lx <- length(xvals)

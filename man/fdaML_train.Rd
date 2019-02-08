@@ -35,7 +35,8 @@ after bining/one-hot-encoding has taken place.}
 \item{intercept}{Whether to include a model intercept (\code{TRUE}) or not (\code{FALSE}).}
 
 \item{smooth_w}{A numeric vector of length equal to \code{length(t_tange)} with weights for
-smoothing spectra.}
+smoothing spectra. If spectra smoothign is desired, this vector has to be specified. For
+unweighted smoothing, choose all elements the same (e.g., \code{rep(1,length(t_range))}).}
 
 \item{balanced}{Whether the dataset should be balanced (\code{TRUE}) or not (\code{FALSE}).
 If \code{TRUE}, observations are discarded so that the number of observations for each
