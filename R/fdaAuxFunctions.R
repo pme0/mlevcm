@@ -529,8 +529,9 @@ confusion_plot <- function(d, fam, avgError, binom_labels=c(y0="observed class: 
 #'
 crossvalidation_levelplot <- function(note_x, note_y, letter=list(char="", xloc=1, yloc=1), ...){
   panel.levelplot(...)
-  # SMOOTHEST MODEL
-  panel.points(note_x[1], note_y[1], pch=20, col="black", cex=1)
+  # SMOOTHEST MODELS (bigger circle corresponding to smoother model)
+  for(s in 1:5){
+    panel.points(note_x[s], note_y[s], pch=16, col="black", cex=0.4+0.2*(5-s)) }
   # CONTOUR FOR THE 'ACCEPTABLE MODELS'
   for(h in 1:length(note_x)){
     # bottom boundaries
