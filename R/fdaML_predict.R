@@ -35,7 +35,7 @@ fdaML_predict <- function(obj, new_x, new_z = NULL, new_y, verbose = TRUE){
 
   # transform new data
   new_y_out <- new_y
-  cenY <- mean(new_y)
+  cenY <- mean(obj$y)
   new_y <- scale(new_y, cen=cenY, scale=F)
   new_XB <- new_x %*% t(t(obj$B) / colSums(obj$B))  # scaling of 'new_x' is done below as it is randomisation-dependent
 
@@ -83,7 +83,7 @@ fdaML_predict <- function(obj, new_x, new_z = NULL, new_y, verbose = TRUE){
 
   for(rr in 1:obj$reps){
 
-    new_XBV[[rr]] <- scale(new_XB,  cen=T, scale=F)  %*% obj$D_opt[[rr]]
+    new_XBV[[rr]] <- scale(new_XB,  cen=obj$cenX[[rr]], scale=F)  %*% obj$D_opt[[rr]]
     if(!is.null(new_z)){
       new_XBV[[rr]] <- cbind(new_z, new_XBV[[rr]])
     }
