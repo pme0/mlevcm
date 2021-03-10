@@ -4,6 +4,10 @@
 
 The package includes functions to train, predict and assess the performance of machine learning models for spectral data using techniques from Functional Data Analysis---namely functional representation of spectra, spectra smoothing and penalised estimation of the coefficient function.
 
+# Citation
+
+PM Esperan{\c{c}}a, and DF Da, B Lambert, RK Dabir{\'e}, TS Churcher (2020) "Functional data analysis techniques to improve the generalizability of near-infrared spectral data for monitoring mosquito populations", BioRxiv.
+
 
 ## Main Functions
 
