@@ -6,10 +6,10 @@ The package includes functions to train, predict and assess the performance of m
 
 # Citation
 
-PM Esperança, and DF Da, B Lambert, RK Dabiré, TS Churcher (2020) "Functional data analysis techniques to improve the generalizability of near-infrared spectral data for monitoring mosquito populations", BioRxiv.
+PM Esperança, DF Da, B Lambert, RK Dabiré, TS Churcher (2020) "Functional data analysis techniques to improve the generalizability of near-infrared spectral data for monitoring mosquito populations", BioRxiv.
 
 
-## Main Functions
+# Main Functions
 
 The main functions in this package are:
 * **fdaML_train()** trains a machine learning model and assesses its performance;
