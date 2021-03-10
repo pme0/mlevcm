@@ -6,7 +6,7 @@ The package includes functions to train, predict and assess the performance of m
 
 # Citation
 
-PM Esperan{\c{c}}a, and DF Da, B Lambert, RK Dabir{\'e}, TS Churcher (2020) "Functional data analysis techniques to improve the generalizability of near-infrared spectral data for monitoring mosquito populations", BioRxiv.
+PM Esperança, and DF Da, B Lambert, RK Dabiré, TS Churcher (2020) "Functional data analysis techniques to improve the generalizability of near-infrared spectral data for monitoring mosquito populations", BioRxiv.
 
 
 ## Main Functions
